@@ -40,10 +40,12 @@ class LoginScreen:
         if not username or not password:
             messagebox.showerror("Error de Validación", "Ambos campos son obligatorios.")
             return
-            #llamada a la lógica de autenticación(capa de datos)
+        
+        #llamada a la lógica de autenticación(capa de datos)
         
         user_info: user_info = self.empleado_dao.authenticate_user(username, password)
         
+        # Lógica de Autorización/Resultado
         if user_info: 
             messagebox.showinfo("Éxito", f"Bienvenido, {user_info['nombre']}! Rold ID: {user_info['id_rol']}")
                 
