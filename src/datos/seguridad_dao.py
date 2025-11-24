@@ -1,5 +1,5 @@
-#Módulo para el manejo de seguridad de contraseñas mediante hashing (bcrypt).
-#Crucial para la Autenticación Segura y Protección de Datos Sensibles.
+#Módulo para el manejo de seguridad de contraseñas mediante hashing (bcrypt)
+#Crucial para la Autenticación Segura y Protección de Datos Sensibles
 import bcrypt
 
 class SeguridadDAO:
@@ -30,4 +30,6 @@ class SeguridadDAO:
             # Retorna True si coinciden, False en caso contrario.
             return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
         except ValueError:
-            return False
+            return False   
+        
+        
