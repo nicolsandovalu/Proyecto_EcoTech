@@ -47,3 +47,4 @@ class DatabaseConnector:
     # Devuelve el objeto de conexión para ser usado por los DAOs.
     def get_connection(self):
         return self._connection
+
