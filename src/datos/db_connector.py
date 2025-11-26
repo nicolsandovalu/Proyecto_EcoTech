@@ -9,7 +9,7 @@ class DatabaseConnector:
 
     def __init__(self):
         self.user = os.getenv("DB_USER", "usuario_por_defecto")
-        self.password = os.getenv("DB_PASS", "contaseña_por_defecto")
+        self.password = os.getenv("DB_PASS", "contasena_por_defecto")
         self.host = os.getenv("DB_HOST", "localhost")
         self.port = os.getenv("DB_PORT", "1521")
         self.service_name = os.getenv("DB_SERVICE", "XEPDB1")
@@ -47,4 +47,18 @@ class DatabaseConnector:
     # Devuelve el objeto de conexión para ser usado por los DAOs.
     def get_connection(self):
         return self._connection
+
+# --- Bloque de prueba temporal para verificar la conexión ---
+if __name__ == "__main__":
+    print("--- Ejecutando prueba de conexión ---")
+    connector = DatabaseConnector()
+    connection = connector.connect()
+    
+    if connection:
+        print("La prueba fue exitosa. La conexión está lista para los DAOs.")
+    else:
+        print("La prueba falló. Revise su archivo .env y el estado del servicio Oracle.")
+        
+    connector.disconnect()
+    print("--- Prueba finalizada ---")
 
