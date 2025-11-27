@@ -35,9 +35,20 @@ class Empleado:
     def asignar_departamento(self, nuevo_id_departamento: int):
         #permite reasignación de empleado a un depto. diferente
         
-        #asigna empleado a un proyecto
+        #asigna empleado a un departamento
         self._id_departamento = nuevo_id_departamento
         print(f"Empleado {self._nombre} reasignado al Dpto ID: {nuevo_id_departamento}")
+        
+    def desasignar_departamento(self, departamento_obj):
+        
+        if departamento_obj in self._id_departamento:
+            self._id_departamento.remove(departamento_obj)
+            return True
+        return False
+    
+    def asignar_proyecto(self, nuevo_id_proyecto: int):
+        self._proyectos_asignados = nuevo_id_proyecto
+        print (f"Empleado {self._nombre} asignado al proyecto ID: {nuevo_id_proyecto}")
         
     def desasignar_proyecto(self, proyecto_obj):
         #desasigna al empleado 
