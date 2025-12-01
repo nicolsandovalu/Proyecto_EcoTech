@@ -102,3 +102,4 @@ class UsuarioDAO:
                 cursor.close()
             if conn:
                 conn.close()
+                
