@@ -71,7 +71,6 @@ class ProyectoDAO:
             return None
         finally:
             cursor.close()
-            conn.close()
 
     # --- MÉTODO: READ (LISTAR TODOS) ---
     def get_all_proyectos(self) -> list:
@@ -104,24 +103,28 @@ class ProyectoDAO:
             return []
         finally:
             cursor.close()
-            conn.close()
             
     # --- MÉTODO: UPDATE (CORRECCIÓN FINAL DPY-1001) ---
     def update_proyecto(self, proyecto_obj: Proyecto) -> bool:
-        """Actualiza la información de un proyecto existente (Operación UPDATE)."""
+        
         conn = self.db.connect()
-        if not conn: return False
+        if not conn: 
+            return False
 
         cursor = conn.cursor()
         data = proyecto_obj.to_dict() 
         
         try:
+           # CORRECCIÓN DPY-4008: Eliminar clave no usada en el UPDATE
+            if 'fecha_creacion' in data:
+                del data['fecha_creacion']
+
             # CORRECCIÓN DEFINITIVA: Convertir el valor de la fecha a string
             fecha_inicio_val = data['fecha_inicio']
             
             # Si no es una cadena (es un date/datetime object), lo formateamos a string 'YYYY-MM-DD'.
             if fecha_inicio_val and not isinstance(fecha_inicio_val, str):
-                data['fecha_inicio'] = fecha_inicio_val.strftime('%Y-%m-%d') 
+                data['fecha_inicio'] = fecha_inicio_val.strftime('%Y-%m-%d')
                 
             sql = """
                 UPDATE PROYECTO
@@ -143,16 +146,14 @@ class ProyectoDAO:
             return False
             
         finally:
-            if cursor:
-                cursor.close()
-            if conn:
-                conn.close()
+            cursor.close()
 
     # --- MÉTODO: DELETE (NUEVO) ---
     def delete_proyecto(self, proyecto_id: int) -> bool:
         """Elimina un proyecto, incluyendo sus dependencias (Operación DELETE)."""
         conn = self.db.connect()
-        if not conn: return False
+        if not conn: 
+            return False
 
         cursor = conn.cursor()
         
@@ -178,7 +179,6 @@ class ProyectoDAO:
             
         finally:
             cursor.close()
-            conn.close()
             
     # --- MÉTODOS: ASIGNACIÓN N:M ---
     def assign_empleado(self, id_proyecto: int, id_empleado: str) -> bool:
@@ -198,6 +198,6 @@ class ProyectoDAO:
             conn.rollback()
             print(f"Error ORA-{e.args[0].code} al asignar empleado: {e.args[0].message}")
             return False
+        
         finally:
-            cursor.close()
-            conn.close()
+                cursor.close()
