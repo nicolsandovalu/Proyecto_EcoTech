@@ -14,6 +14,7 @@ from src.dominio.registroTiempo import RegistroTiempo
 from src.datos.rol_dao import RolDAO
 from src.dominio.rol import Rol
 from datetime import date, datetime
+import getpass
 from typing import Optional
 
 
@@ -66,7 +67,7 @@ def register_new_employee():
             'fecha_inicio_contrato': input("Fecha Inicio (YYYY-MM-DD): ")
         }
         
-        contrasena_plana = input("Contraseña inicial: ")
+        contrasena_plana = getpass.getpass("Contraseña inicial: ")
         
         #Crear objeto Empleaado y Persistir
         nuevo_empleado = Empleado(**data)
@@ -555,7 +556,7 @@ def main():
     # Bucle de Autenticación
     while user_session is None:
         username = input("Usuario (Login/Email): ")
-        password = input("Contraseña: ")
+        password = getpass.getpass("Contraseña: ")
         
         # Llamada a la Capa de Datos para la Autenticación Segura (Requisito 9)
         usuario_dao = UsuarioDAO()
