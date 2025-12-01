@@ -31,3 +31,25 @@ class SeguridadDAO:
             return False   
         
         
+
+# --- Bloque de prueba para generar hash e insertarlo en Oracle ---
+
+if __name__ == "__main__":
+    # La clase SeguridadDAO ya está definida en este archivo, la usamos directamente
+    
+    # 1. Definimos la contraseña plana que queremos usar
+    CONTRASENA_PLANA = "admin123" 
+    
+    # 2. Generamos el hash cifrado usando bcrypt
+    fresh_hash = SeguridadDAO.hash_password(CONTRASENA_PLANA)
+    
+    print("\n=============================================")
+    print("HASH GENERADO PARA ORACLE (admin123):")
+    print(fresh_hash)
+    print("=============================================")
+    
+    # 3. Prueba de verificación (opcional)
+    if SeguridadDAO.check_password(CONTRASENA_PLANA, fresh_hash):
+        print("VERIFICACIÓN INTERNA: ÉXITO (El hash es válido para la clave plana).")
+    else:
+        print("VERIFICACIÓN INTERNA: FALLO. Algo salió mal con la generación del hash.")

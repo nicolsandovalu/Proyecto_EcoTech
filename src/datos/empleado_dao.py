@@ -25,8 +25,10 @@ class EmpleadoDAO:
         try:
             cursor = conn.cursor()
             sql = """
-                INSERT INTO EMPLEADO (ID_EMPLEADO, ID_CARGO, ID_DEPARTAMENTO, NOMBRE, EMAIL, SALARIO, FECHA_INICIO_CONTRATO)
-                VALUES (:id_empleado, :id_cargo, :id_departamento, :nombre, :email, :salario, TO_DATE(:fecha_inicio_contrato, 'YYYY-MM-DD'))
+                INSERT INTO EMPLEADO (ID_EMPLEADO, ID_CARGO, ID_DEPARTAMENTO, NOMBRE, EMAIL, SALARIO, 
+                                    FECHA_INICIO_CONTRATO, DIRECCION, TELEFONO)
+                VALUES (:id_empleado, :id_cargo, :id_departamento, :nombre, :email, :salario, 
+                        TO_DATE(:fecha_inicio_contrato, 'YYYY-MM-DD'), :direccion, :telefono)
             """
 
             # Usamos el to_dict del modelo Empleado para obtener los datos
