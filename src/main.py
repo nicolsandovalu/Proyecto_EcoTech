@@ -126,6 +126,17 @@ def delete_employee_console():
     else:
         print("FALLO: La eliminación falló (El empleado podría tener registros de tiempo dependientes).")
 
+def list_all_projects():
+        dao = ProyectoDAO
+        proyectos = dao.get_all_proyectos()
+        
+        if proyectos:
+            print ("n\ --- LISTADO DE PROYECTOS ---")
+            for proj in proyectos:
+                print(f"ID: {proj.get_id():<5} | Nombre: {proj.get_nombre():<30} | Inicio: {proj.get_fecha_inicio()}")
+        else:
+            print("No hay proyectos registrados o la conexión falló.")
+
 
 # ========================================================
 # FUNCIÓN PRINCIPAL (MAIN)
@@ -175,7 +186,7 @@ def main():
         elif choice == '4' and user_session['id_rol'] == 99:
             delete_employee_console() #  Eliminar Empleado
         elif choice == '5' and user_session['id_rol'] == 99:
-            # Opción 5: Listar Proyectos (Necesita lógica similar a list_all_employees pero con ProyectoDAO)
+            list_all_projects() #Listar proyectos
             print("--- Listar Proyectos (Pendiente de lógica de ProyectoDAO) ---")
         elif choice == '9':
             user_session = None # Simulación de logout
@@ -187,7 +198,9 @@ def main():
              print("AUTORIZACIÓN DENEGADA. No tiene permisos para esta acción.")
         else:
             print("Opción no válida.")
-
+    
+    
+            
     # El bloque finally ahora es solo una limpieza final (la lógica de cierre va al final de main)
     db_manager.disconnect()
     print("Aplicación finalizada y conexión a DB cerrada.")
