@@ -1,79 +1,89 @@
-import cx_Oracle
-from proyecto import Proyecto
+import oracledb
+from ..dominio.proyecto import Proyecto
+from .db_connector import DatabaseConnector
+from datetime import date 
 
 class ProyectoDAO:
+    
     def __init__(self, connection):
-        self.connection = connection
+        self.db = DatabaseConnector()
     
-    def crear(self, proyecto: Proyecto) -> bool:
-        """Inserta nuevo proyecto en BD"""
+    def create_proyecto(self, proyecto_obj: Proyecto) -> bool:
+        """Inserta nuevo proyecto en BD (Operación CREATE)."""
+        conn = self.db.connect()
+        if not conn: return False
+        
+        cursor = conn.cursor()
+        data = proyecto_obj.to_dict() # Obtenemos el diccionario con los datos del objeto
+        
         try:
-            with self.connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO proyecto (id_proyecto, nombre, descripcion, fecha_inicio, fecha_creacion)
-                    VALUES (:1, :2, :3, :4, :5)
-                """, [proyecto.id_proyecto, proyecto.nombre, proyecto.descripcion, 
-                      proyecto.fecha_inicio, proyecto.fecha_creacion])
-                self.connection.commit()
-                return True
-        except Exception as e:
-            print(f"Error crear proyecto: {e}")
+            # La sentencia SQL usa la secuencia y parámetros vinculados por nombre
+            sql = """
+                INSERT INTO PROYECTO (ID_PROYECTO, NOMBRE, DESCRIPCION, FECHA_INICIO, FECHA_CREACION)
+                VALUES (seq_proyecto.NEXTVAL, :nombre, :descripcion, TO_DATE(:fecha_inicio, 'YYYY-MM-DD'), SYSDATE)
+            """
+            cursor.execute(sql, data)
+            conn.commit() # Confirma la transacción
+            return True
+        except oracledb.Error as e:
+            conn.rollback() # Deshace la transacción en caso de error
+            print(f"Error ORA-{e.args[0].code} al crear proyecto: {e.args[0].message}")
             return False
-    
-    def obtener_por_id(self, id_proyecto: int) -> Proyecto:
-        """Obtiene proyecto por ID"""
+        finally:
+            cursor.close()
+            conn.close()
+            
+    # --- MÉTODO: READ (LISTAR TODOS) ---
+    def get_all_proyectos(self) -> list:
+        """Obtiene todos los proyectos y los retorna como una lista de objetos Proyecto."""
+        conn = self.db.connect()
+        if not conn: return []
+        
+        cursor = conn.cursor()
+        proyectos_list = []
+        
         try:
-            with self.connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM proyecto WHERE id_proyecto = :1", [id_proyecto])
-                fila = cursor.fetchone()
-                return Proyecto(fila[0], fila[1], fila[2], fila[3], fila[4]) if fila else None
-        except Exception as e:
-            print(f"Error obtener proyecto: {e}")
-            return None
-    
-    def obtener_todos(self) -> list:
-        """Obtiene todos los proyectos"""
-        try:
-            with self.connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM proyecto ORDER BY fecha_creacion DESC")
-                return [Proyecto(fila[0], fila[1], fila[2], fila[3], fila[4]) for fila in cursor.fetchall()]
-        except Exception as e:
-            print(f"Error obtener proyectos: {e}")
+            sql = "SELECT ID_PROYECTO, NOMBRE, DESCRIPCION, FECHA_INICIO, FECHA_CREACION FROM PROYECTO ORDER BY FECHA_CREACION DESC"
+            cursor.execute(sql)
+            
+            for fila in cursor.fetchall():
+                # Mapeo de fila a objeto Proyecto (POO)
+                proyectos_list.append(Proyecto(
+                    id_proyecto=fila[0],
+                    nombre=fila[1],
+                    descripcion=fila[2],
+                    fecha_inicio=fila[3], # oracledb mapea a date
+                    fecha_creacion=fila[4]
+                ))
+            return proyectos_list
+        except oracledb.Error as e:
+            print(f"Error ORA-{e.args[0].code} al obtener proyectos: {e.args[0].message}")
             return []
+        finally:
+            cursor.close()
+            conn.close()
+            
+    # --- MÉTODOS: ASIGNACIÓN N:M (DELEGADO) ---
     
-    def actualizar(self, proyecto: Proyecto) -> bool:
-        """Actualiza proyecto existente"""
+    def assign_empleado(self, id_proyecto: int, id_empleado: str) -> bool:
+        """Asigna empleado a proyecto (Implementa la lógica N:M)."""
+        conn = self.db.connect()
+        if not conn: return False
+
+        cursor = conn.cursor()
+        
         try:
-            with self.connection.cursor() as cursor:
-                cursor.execute("""
-                    UPDATE proyecto SET nombre = :1, descripcion = :2, fecha_inicio = :3 
-                    WHERE id_proyecto = :4
-                """, [proyecto.nombre, proyecto.descripcion, proyecto.fecha_inicio, proyecto.id_proyecto])
-                self.connection.commit()
-                return True
-        except Exception as e:
-            print(f"Error actualizar proyecto: {e}")
+            # Utiliza la tabla intermedia EMPLEADO_PROYECTO
+            cursor.execute("INSERT INTO EMPLEADO_PROYECTO (ID_EMPLEADO, ID_PROYECTO) VALUES (:emp_id, :proj_id)", [id_empleado, id_proyecto])
+            conn.commit()
+            return True
+        except oracledb.IntegrityError:
+            # Captura si ya está asignado
+            return True
+        except oracledb.Error as e:
+            conn.rollback()
+            print(f"Error ORA-{e.args[0].code} al asignar empleado: {e.args[0].message}")
             return False
-    
-    def eliminar(self, id_proyecto: int) -> bool:
-        """Elimina proyecto por ID"""
-        try:
-            with self.connection.cursor() as cursor:
-                cursor.execute("DELETE FROM empleado_proyecto WHERE id_proyecto = :1", [id_proyecto])
-                cursor.execute("DELETE FROM proyecto WHERE id_proyecto = :1", [id_proyecto])
-                self.connection.commit()
-                return True
-        except Exception as e:
-            print(f"Error eliminar proyecto: {e}")
-            return False
-    
-    def asignar_empleado(self, id_proyecto: int, id_empleado: str) -> bool:
-        """Asigna empleado a proyecto"""
-        try:
-            with self.connection.cursor() as cursor:
-                cursor.execute("INSERT INTO empleado_proyecto VALUES (:1, :2)", [id_empleado, id_proyecto])
-                self.connection.commit()
-                return True
-        except Exception as e:
-            print(f"Error asignar empleado: {e}")
-            return False
+        finally:
+            cursor.close()
+            conn.close()
