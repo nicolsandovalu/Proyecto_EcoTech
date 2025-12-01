@@ -30,21 +30,50 @@ class Empleado:
     def get_salario(self) -> float:
         return self._salario
     
+    def get_id_departamento(self) -> int:
+        return self._id_departamento
+    
+    def get_direccion(self) -> str:
+        return self._direccion
+    
+    #método de edición
+    #modificar salario de empleados
+    
+    def set_salario(self, nuevo_salario: float):
+        if nuevo_salario >= 0:
+            self._salario = nuevo_salario
+            return True
+        return False
+    
     #método de negocio (requisitos del sistema)
     
     def asignar_departamento(self, nuevo_id_departamento: int):
         #permite reasignación de empleado a un depto. diferente
+        #asigna empleado a un departamento
         
-        #asigna empleado a un proyecto
         self._id_departamento = nuevo_id_departamento
         print(f"Empleado {self._nombre} reasignado al Dpto ID: {nuevo_id_departamento}")
+    
+    def asignar_proyecto(self, proyecto_obj):
+        #asigna a empleado a un proyecto
+        
+        if proyecto_obj not in self._proyectos_asignados:
+            self._proyectos_asignados.append(proyecto_obj)
+            return True
+        return False
         
     def desasignar_proyecto(self, proyecto_obj):
-        #desasigna al empleado 
+        #desasigna al empleado de un proyecto
+        
         if proyecto_obj in self._proyectos_asignados:
             self._proyectos_asignados.remove(proyecto_obj)
             return True
         return False
+    
+    def registrar_hora(self, registro_obj):
+        #registra tiempo trabajado / la lógica se encuentra en Registro Tiempo
+        
+        print(f"Empleado {self._nombre} registra horas para el proyecto: {registro_obj.get_proyecto_id()}")
     
     def to_dict(self) -> dict:
         #convierte el objeto empelado a un diccionario para su uso en la capa de datos o UI
