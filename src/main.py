@@ -2,7 +2,7 @@ import sys
 from src.datos.db_connector import DatabaseConnector
 from src.datos.empleado_dao import EmpleadoDAO
 from src.datos.proyecto_dao import ProyectoDAO
-from src.datos.usuario_dao import UsuarioDAO
+from .datos.usuario_dao import UsuarioDAO
 from src.datos.seguridad_dao import SeguridadDAO
 from src.dominio.empleado import Empleado
 from src.dominio.usuario import Usuario
@@ -98,6 +98,7 @@ def assign_project_console():
         return
 
     dao = EmpleadoDAO()
+    dao = ProyectoDAO()
     
     # 1. Verificar si el empleado y proyecto existen (Validación Segura)
     
@@ -106,6 +107,25 @@ def assign_project_console():
         print(f"ÉXITO: Empleado {empleado_id} asignado al Proyecto {proyecto_id}.")
     else:
         print("FALLO: La asignación falló (Verifique IDs o conexión).")
+    
+    if dao_emp.get_empleado_by_id(empleado_id) is None:
+        print(f"Error de Validación: El Empleado ID '{empleado_id}' no existe.")
+        return
+        
+    if dao_proj.get_proyecto_by_id(proyecto_id) is None:
+        print(f"Error de Validación: El Proyecto ID '{proyecto_id}' no existe.")
+        return
+
+def list_all_projects():
+        dao = ProyectoDAO()
+        proyectos = dao.get_all_proyectos()
+        
+        if proyectos:
+            print ("n\ --- LISTADO DE PROYECTOS ---")
+            for proj in proyectos:
+                print(f"ID: {proj.get_id():<5} | Nombre: {proj.get_nombre():<30} | Inicio: {proj.get_fecha_inicio()}")
+        else:
+            print("No hay proyectos registrados o la conexión falló.")
 
 # ---  ELIMINAR EMPLEADO (Opción 4) ---
 def delete_employee_console():
@@ -126,16 +146,7 @@ def delete_employee_console():
     else:
         print("FALLO: La eliminación falló (El empleado podría tener registros de tiempo dependientes).")
 
-def list_all_projects():
-        dao = ProyectoDAO
-        proyectos = dao.get_all_proyectos()
-        
-        if proyectos:
-            print ("n\ --- LISTADO DE PROYECTOS ---")
-            for proj in proyectos:
-                print(f"ID: {proj.get_id():<5} | Nombre: {proj.get_nombre():<30} | Inicio: {proj.get_fecha_inicio()}")
-        else:
-            print("No hay proyectos registrados o la conexión falló.")
+
 
 
 # ========================================================
