@@ -288,9 +288,60 @@ def list_all_departamentos():
         print ("\n--- LISTADO DE DEPARTAMENTOS ---")
         for dpto in departamentos:
             estado = "Activo" if dpto.activo else "Inactivo"
-            print(f"ID: {dpto.id_departamento:<5} | Nombre: {dpto.nombre:<30} | Gerente ID: {dpto.empleado_id or 'N/A'} | Estado: {estado}")
+            print(f"ID: {dpto.id_departamento:<5} | Nombre: {dpto.nombre:<30} | Gerente ID: {dpto.gerente_id or 'N/A'} | Estado: {estado}")
     else:
         print("No hay departamentos registrados o la conexión falló.")
+        
+def update_departamento_console():
+    print("\n--- MODIFICAR DEPARTAMENTO ---")
+    dao = DepartamentoDAO()
+    try:
+        depto_id = int(input("ID del Departamento a modificar: "))
+        depto_obj = dao.get_departamento_by_id(depto_id)
+        
+        if not depto_obj:
+            print(f"Error: Departamento ID {depto_id} no encontrado.")
+            return
+
+        print(f"\nModificando: {depto_obj.nombre}")
+        
+        nuevo_nombre = input(f"Nuevo Nombre (Actual: {depto_obj.nombre}): ") or depto_obj.nombre
+        activo_str = input(f"Estado Activo (1/0, Actual: {1 if depto_obj.activo else 0}): ")
+
+        if nuevo_nombre:
+            depto_obj.nombre = nuevo_nombre
+        if activo_str in ['0', '1']:
+            depto_obj.activo = (activo_str == '1')
+        
+        if dao.update_departamento(depto_obj):
+            print(f"ÉXITO: Departamento ID {depto_id} modificado correctamente.")
+        else:
+            print("FALLO: No se pudo modificar el departamento.")
+
+    except ValueError:
+        print("Error: El ID debe ser numérico.")
+    except Exception as e:
+        print(f"Error al modificar departamento: {e}")
+
+def delete_departamento_console():
+    print("\n--- ELIMINAR DEPARTAMENTO (Soft Delete) ---")
+    dao = DepartamentoDAO()
+    try:
+        depto_id = int(input("ID del Departamento a desactivar: "))
+        confirm = input(f"¿Confirma la desactivación (Soft Delete) del departamento ID {depto_id}? (S/N): ").upper()
+
+        if confirm == 'S':
+            if dao.delete_departamento(depto_id): # Este método hace un UPDATE ACTIVO=0
+                print(f"ÉXITO: Departamento ID {depto_id} desactivado.")
+            else:
+                print("FALLO: La desactivación falló (Verifique si el ID existe).")
+        else:
+            print("Operación cancelada.")
+            
+    except ValueError:
+        print("Error: El ID del Departamento debe ser numérico.")
+    except Exception as e:
+        print(f"Error inesperado al eliminar departamento: {e}")
     
 def assign_gerente_console():
     print("\n--- ASIGNAR GERENTE A DEPARTAMENTO ---")
@@ -388,6 +439,68 @@ def create_rol_console():
     except Exception as e:
         print(f"Error en la entrada de datos: {e}")
 
+def update_rol_console():
+    """Implementa la funcionalidad de Modificar Rol (Opción 3)."""
+    print("\n--- MODIFICAR ROL ---")
+    dao = RolDAO()
+    try:
+        id_rol = int(input("ID del Rol a modificar: "))
+        rol_obj = dao.get_rol_by_id(id_rol)
+        
+        if not rol_obj:
+            print(f"Error: Rol ID {id_rol} no encontrado.")
+            return
+            
+        print(f"\nModificando Rol: {rol_obj.get_nombre()} (Nivel: {rol_obj.get_nivel_permisos()})")
+        
+        nuevo_nombre = input(f"Nuevo Nombre (Actual: {rol_obj.get_nombre()}): ") or rol_obj.get_nombre()
+        nueva_descripcion = input(f"Nueva Descripción (Actual: {rol_obj.get_descripcion()}): ") or rol_obj.get_descripcion()
+        nuevo_nivel_str = input(f"Nuevo Nivel de Permisos (Actual: {rol_obj.get_nivel_permisos()}): ")
+        
+        nuevo_nivel = int(nuevo_nivel_str) if nuevo_nivel_str else rol_obj.get_nivel_permisos()
+        
+        # Actualización de atributos del objeto
+        rol_obj.set_nombre(nuevo_nombre)
+        rol_obj.set_descripcion(nueva_descripcion)
+        rol_obj.set_nivel_permisos(nuevo_nivel)
+        
+        if dao.update_rol(rol_obj):
+            print(f"ÉXITO: Rol ID {id_rol} modificado correctamente.")
+        else:
+            print("FALLO: No se pudo modificar el Rol en la base de datos.")
+
+    except ValueError:
+        print("Error: El ID y el Nivel de Permisos deben ser números enteros.")
+    except Exception as e:
+        print(f"Error al modificar Rol: {e}")
+
+def delete_rol_console():
+    """Implementa la funcionalidad de Eliminar Rol (Opción 4)."""
+    print("\n--- ELIMINAR ROL ---")
+    dao = RolDAO()
+    try:
+        id_rol = int(input("ID del Rol a eliminar: "))
+        
+        rol_obj = dao.get_rol_by_id(id_rol)
+        if not rol_obj:
+            print(f"Error: Rol ID {id_rol} no encontrado.")
+            return
+
+        confirm = input(f"¿Confirma la eliminación del Rol '{rol_obj.get_nombre()}' (ID: {id_rol})? (S/N): ").upper()
+        
+        if confirm == 'S':
+            if dao.delete_rol(id_rol):
+                print(f"ÉXITO: Rol ID {id_rol} eliminado correctamente.")
+            else:
+                print("FALLO: La eliminación falló (El Rol podría tener usuarios asociados).")
+        else:
+            print("Operación cancelada.")
+            
+    except ValueError:
+        print("Error: El ID del Rol debe ser un número entero.")
+    except Exception as e:
+        print(f"Error inesperado al eliminar Rol: {e}")
+
 
 #Registro de Tiempo opción 6
 
@@ -482,7 +595,8 @@ def main():
                 sub_choice = menu_departamentos_admin()
                 if sub_choice == '1': create_departamento_console()
                 elif sub_choice == '2': list_all_departamentos()
-                # Opciones 3 y 4 (Modificar/Eliminar) son ejercicios que se implementan de forma similar
+                elif sub_choice == '3': update_departamento_console()
+                elif sub_choice == '4': delete_departamento_console()
                 elif sub_choice == '5': assign_gerente_console()
                 elif sub_choice == '6': continue
                 else: print("Opción no válida en el menú de Departamentos.")
@@ -494,7 +608,8 @@ def main():
                 sub_choice = menu_roles_admin()
                 if sub_choice == '1': create_rol_console()
                 elif sub_choice == '2': list_all_roles()
-                # 3 y 4 Pendientes (Modificar/Eliminar)
+                elif sub_choice == '3': update_rol_console()
+                elif sub_choice == '4': delete_rol_console()
                 elif sub_choice == '5': continue
                 else: print("Opción no válida en el menú de Roles.")
 

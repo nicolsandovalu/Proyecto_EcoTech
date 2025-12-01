@@ -1,21 +1,15 @@
 class Departamento:
-    """
-    Clase que representa la entidad Departamento dentro del sistema EcoTech Solutions.
-    Corresponde al modelo de dominio (POO).
-    """
+
 
     def __init__(self, id_departamento: int = None, nombre: str = None,
-                gerente_id: str = None, activo: bool = True, fecha_creacion=None):
-
+                 gerente_id: str = None, activo: bool = True, fecha_creacion=None): # <-- Sincronizado a gerente_id
+        
         # Atributos de persistencia
-        # PK, puede ser None al crear (usando secuencia)
         self.id_departamento = id_departamento
         self.nombre = nombre
-        self.gerente_id = gerente_id            # FK a Empleado (Gerente)
-        self.activo = activo   # Para Soft Delete (True/False)
+        self.gerente_id = gerente_id 
+        self.activo = activo 
         self.fecha_creacion = fecha_creacion
-
-        # Notas: Se puede agregar la fecha_creacion si es necesaria en el objeto.
 
     def __str__(self):
         """Representación amigable del objeto."""
@@ -24,20 +18,15 @@ class Departamento:
 
     def to_dict(self):
         """
-        Convierte el objeto Departamento a un diccionario compatible con las consultas SQL
-        del DepartamentoDAO.
+        Convierte el objeto Departamento a un diccionario compatible con las consultas SQL.
+        Se asegura que la clave enviada sea 'gerente_id'.
         """
         return {
             'id_departamento': self.id_departamento,
             'nombre': self.nombre,
-            'gerente_id': self.gerente_id,
-            # El DAO espera un valor numérico (0 o 1) para el campo ACTIVO en Oracle
+            'gerente_id': self.gerente_id, # <-- KEY DE BINDING CORRECTA
             'activo': 1 if self.activo else 0
         }
-
-    # =============================
-    # Métodos de Negocio (Ejemplo)
-    # =============================
 
     def desactivar(self):
         """Marca el departamento como inactivo (Soft Delete)."""

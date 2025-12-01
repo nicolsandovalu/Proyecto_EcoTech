@@ -1,7 +1,7 @@
 import oracledb
 from ..dominio.proyecto import Proyecto
 from .db_connector import DatabaseConnector
-from datetime import date, datetime # Aseguramos la importación de datetime y date
+from datetime import date, datetime 
 from typing import Optional
 
 class ProyectoDAO:

@@ -10,10 +10,11 @@ class DepartamentoDAO:
     def __init__(self):
         self.db = DatabaseConnector()
 
+    # ========================================================
+    # 1. MÉTODO: CREATE (Crear nuevo departamento)
+    # ========================================================
     def create_departamento(self, departamento_obj: Departamento) -> int | None:
     
-        #Registra un nuevo departamento en la base de datos (Operación CREATE).
-        
         conn = self.db.connect()
         if not conn:
             return None
@@ -21,6 +22,7 @@ class DepartamentoDAO:
         cursor = conn.cursor()
         data = departamento_obj.to_dict()
         
+        # Eliminar ID de Python (resuelve DPY-4008)
         if 'id_departamento' in data:
             del data['id_departamento']
         
@@ -28,7 +30,7 @@ class DepartamentoDAO:
         data['new_id'] = new_id_var
         
         try:
-            # Usamos la secuencia de Oracle para obtener el ID (Asumimos que está definida: seq_departamento)
+            # SQL CORREGIDO: Usando GERENTE_ID
             sql = """
                 INSERT INTO DEPARTAMENTO (ID_DEPARTAMENTO, NOMBRE, GERENTE_ID, ACTIVO)
                 VALUES (seq_departamento.NEXTVAL, :nombre, :gerente_id, :activo)
@@ -53,9 +55,10 @@ class DepartamentoDAO:
             if cursor:
                 cursor.close()
 
+    # ========================================================
+    # 2. MÉTODO: READ (Buscar por ID)
+    # ========================================================
     def get_departamento_by_id(self, depto_id: int) -> Departamento | None:
-        
-        #Busca y retorna un departamento por su ID (Operación READ/Buscar).
         
         conn = self.db.connect()
         if not conn:
@@ -64,16 +67,17 @@ class DepartamentoDAO:
         cursor = conn.cursor()
         
         try:
-            sql = "SELECT ID_DEPARTAMENTO, NOMBRE, EMPLEADO_ID, FECHA_CREACION, ACTIVO FROM DEPARTAMENTO WHERE ID_DEPARTAMENTO = :id"
+            # SQL CORREGIDO
+            sql = "SELECT ID_DEPARTAMENTO, NOMBRE, GERENTE_ID, FECHA_CREACION, ACTIVO FROM DEPARTAMENTO WHERE ID_DEPARTAMENTO = :id"
             cursor.execute(sql, {'id': depto_id})
             row = cursor.fetchone()
             
             if row:
-                # Mapeo de tupla de Oracle a objeto Departamento (POO)
+                # Mapeo a objeto Departamento, usando gerente_id
                 return Departamento(
                     id_departamento=row[0],
                     nombre=row[1],
-                    gerente_id=row[2],
+                    gerente_id=row[2], 
                     fecha_creacion=row[3],
                     activo=int(row[4])
                 )
@@ -88,9 +92,10 @@ class DepartamentoDAO:
             if cursor:
                 cursor.close()
 
+    # ========================================================
+    # 3. MÉTODO: UPDATE (Modificar departamento)
+    # ========================================================
     def update_departamento(self, departamento_obj: Departamento) -> bool:
-        
-        #Actualiza la información de un departamento existente (Operación UPDATE/Editar).
         
         conn = self.db.connect()
         if not conn:
@@ -100,10 +105,11 @@ class DepartamentoDAO:
         data = departamento_obj.to_dict()
         
         try:
+            # SQL CORREGIDO: Usa GERENTE_ID
             sql = """
                 UPDATE DEPARTAMENTO
                 SET NOMBRE = :nombre, 
-                    GERENTE_ID = :gerente_id,
+                    GERENTE_ID = :gerente_id, 
                     ACTIVO = :activo
                 WHERE ID_DEPARTAMENTO = :id_departamento
             """
@@ -124,10 +130,10 @@ class DepartamentoDAO:
             if cursor:
                 cursor.close()
 
+    # ========================================================
+    # 4. MÉTODO: DELETE (Soft Delete)
+    # ========================================================
     def delete_departamento(self, depto_id: int) -> bool:
-        
-        #Elimina (o desactiva) un departamento (Operación DELETE/Eliminar).
-        #Nota: Se recomienda un 'soft delete' (cambiar ACTIVO=0) en lugar de DELETE físico si hay FKs.
         
         conn = self.db.connect()
         if not conn:
@@ -136,11 +142,8 @@ class DepartamentoDAO:
         cursor = conn.cursor()
         
         try:
-            # Opción más segura: Soft Delete (si la empresa lo permite)
+            # Implementa Soft Delete (cambiar ACTIVO=0)
             sql = "UPDATE DEPARTAMENTO SET ACTIVO = 0 WHERE ID_DEPARTAMENTO = :id"
-            
-            # Opción requerida (si no hay datos dependientes): Hard Delete
-            # sql = "DELETE FROM DEPARTAMENTO WHERE ID_DEPARTAMENTO = :id"
             
             cursor.execute(sql, {'id': depto_id})
             
@@ -153,17 +156,17 @@ class DepartamentoDAO:
             conn.rollback()
             error, = e.args
             print(f"Error ORA-{error.code} al eliminar departamento: {error.message}")
-            # El error ORA-02292 (restricción de integridad violada) ocurriría aquí si usamos DELETE físico
             return False
             
         finally:
             if cursor:
                 cursor.close()
             
-# MÉTODO: READ (LISTAR)
+    # ========================================================
+    # 5. MÉTODO: READ (Listar todos)
+    # ========================================================
     def get_all_departamentos(self) -> List:
     
-    #Recupera y retorna una lista de todos los departamentos registrados 
         conn = self.db.connect()
         if not conn:
             return []
@@ -173,20 +176,21 @@ class DepartamentoDAO:
     
         try:
             cursor = conn.cursor()
+            # SQL CORREGIDO
             sql = """
-                SELECT ID_DEPARTAMENTO, NOMBRE, EMPLEADO_ID, FECHA_CREACION, ACTIVO 
+                SELECT ID_DEPARTAMENTO, NOMBRE, GERENTE_ID, FECHA_CREACION, ACTIVO 
                 FROM DEPARTAMENTO 
                 ORDER BY NOMBRE"""
     
             cursor.execute(sql)
             results = cursor.fetchall()
         
-        # Mapea todas las filas a objetos del dominio
             for row in results:
+                # Mapeo de retorno CORREGIDO
                 departamentos_list.append(Departamento(
                     id_departamento=row[0],
                     nombre=row[1],
-                    gerente_id=row[2],
+                    gerente_id=row[2], 
                     fecha_creacion=row[3],
                     activo=int(row[4])
                 )
