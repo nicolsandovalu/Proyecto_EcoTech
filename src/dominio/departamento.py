@@ -17,10 +17,7 @@ class Departamento:
         return f"Departamento ID: {self.id_departamento} | Nombre: {self.nombre} | Gerente ID: {self.gerente_id} | Estado: {estado}"
 
     def to_dict(self):
-        """
-        Convierte el objeto Departamento a un diccionario compatible con las consultas SQL.
-        Se asegura que la clave enviada sea 'gerente_id'.
-        """
+
         return {
             'id_departamento': self.id_departamento,
             'nombre': self.nombre,
