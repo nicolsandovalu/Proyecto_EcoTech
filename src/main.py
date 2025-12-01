@@ -6,6 +6,7 @@ from .datos.usuario_dao import UsuarioDAO
 from src.datos.seguridad_dao import SeguridadDAO
 from src.dominio.empleado import Empleado
 from src.dominio.usuario import Usuario
+from src.dominio.proyecto import Proyecto
 from datetime import date 
 
 
@@ -97,24 +98,24 @@ def assign_project_console():
         print("Error: El ID del proyecto debe ser un número entero.")
         return
 
-    dao = EmpleadoDAO()
-    dao = ProyectoDAO()
+    dao_emp = EmpleadoDAO() 
+    dao_proj = ProyectoDAO()
     
     # 1. Verificar si el empleado y proyecto existen (Validación Segura)
-    
-    # 2. Llamar al DAO para realizar la asignación N:M
-    if dao.assign_empleado_to_proyecto(empleado_id, proyecto_id):
-        print(f"ÉXITO: Empleado {empleado_id} asignado al Proyecto {proyecto_id}.")
-    else:
-        print("FALLO: La asignación falló (Verifique IDs o conexión).")
-    
     if dao_emp.get_empleado_by_id(empleado_id) is None:
         print(f"Error de Validación: El Empleado ID '{empleado_id}' no existe.")
         return
         
+    # Verifica si el proyecto existe
     if dao_proj.get_proyecto_by_id(proyecto_id) is None:
         print(f"Error de Validación: El Proyecto ID '{proyecto_id}' no existe.")
         return
+    
+    # 2. Llamar al DAO para realizar la asignación N:M
+    if dao_emp.assign_empleado_to_proyecto(empleado_id, proyecto_id):
+        print(f"ÉXITO: Empleado {empleado_id} asignado al Proyecto {proyecto_id}.")
+    else:
+        print("FALLO: La asignación falló (Verifique IDs o conexión).")
 
 def list_all_projects():
         dao = ProyectoDAO()

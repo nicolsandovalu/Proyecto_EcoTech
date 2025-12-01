@@ -5,7 +5,7 @@ from datetime import date
 
 class ProyectoDAO:
     
-    def __init__(self, connection):
+    def __init__(self):
         self.db = DatabaseConnector()
     
     def create_proyecto(self, proyecto_obj: Proyecto) -> bool:
