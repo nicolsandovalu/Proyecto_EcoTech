@@ -11,23 +11,39 @@ class Proyecto:
         self._fecha_creacion = fecha_creacion or date.today()
         self._empleados: List = []
     
+    def get_id(self) -> int:
+        """Retorna el ID del proyecto (acceso público al atributo _id_proyecto)."""
+        return self._id_proyecto
+
+    def get_nombre(self) -> str:
+        """Retorna el nombre del proyecto."""
+        return self._nombre
+
+    def get_descripcion(self) -> str:
+        """Retorna la descripción del proyecto."""
+        return self._descripcion
+        
+    def get_fecha_inicio(self) -> date:
+        """Retorna la fecha de inicio del proyecto."""
+        return self._fecha_inicio
+    
     def crear(self) -> int:
-       #Crear nuevo proyecto
+        # Método lógico para la capa de servicio
         return self._id_proyecto
     
     def editar(self, nombre: str = None, descripcion: str = None) -> None:
-        """Edita los datos del proyecto"""
+        """Edita los datos del proyecto (Validación de Entradas Seguras)."""
         if nombre:
             self._nombre = nombre
         if descripcion:
             self._descripcion = descripcion
     
     def eliminar(self) -> bool:
-        """Elimina el proyecto"""
+        # Método lógico para la capa de servicio
         return True
     
     def asignar_empleados(self, empleado: 'Empleado'):
-        """Asigna un empleado al proyecto"""
+        """Asigna un empleado al proyecto (Relación N:M)."""
         if empleado not in self._empleados:
             self._empleados.append(empleado)
             return True
@@ -39,11 +55,11 @@ class Proyecto:
             return True
         return False
     
-    #Método para el DAO
+    # --- MÉTODO PARA EL DAO ---
     
     def to_dict(self) -> dict:
-        #Convierte el objeto Proyecto a un diccionario para que el DAO lo use en las operaciones SQL
-        fecha_inicio_str = self._fecha_inicio.strftime('%Y-%m-%d') if self ._fecha_inicio else None
+        """Convierte el objeto Proyecto a un diccionario para que el DAO lo use en las operaciones SQL."""
+        fecha_inicio_str = self._fecha_inicio.strftime('%Y-%m-%d') if self._fecha_inicio else None
         fecha_creacion_str = self._fecha_creacion.strftime('%Y-%m-%d') if self._fecha_creacion else None
         
         return {
@@ -54,6 +70,5 @@ class Proyecto:
             'fecha_creacion': fecha_creacion_str
         }
         
-
     def __str__(self) -> str:
         return f"Proyecto({self._id_proyecto}): {self._nombre}"
