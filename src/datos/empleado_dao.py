@@ -1,6 +1,7 @@
 import oracledb
 from ..dominio.empleado import Empleado
 from .db_connector import DatabaseConnector
+from typing import List
 
 
 class EmpleadoDAO:
@@ -77,7 +78,7 @@ class EmpleadoDAO:
             for row in results:
                 # La función strftime es necesaria aquí ya que row[6] es un objeto datetime de Python
                 empleados_list.append(Empleado(
-                   id_empleado=row[0],
+                    id_empleado=row[0],
                     id_cargo=row[1],
                     id_departamento=row[2],
                     nombre=row[3],
