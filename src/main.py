@@ -102,14 +102,14 @@ def assign_project_console():
     dao_proj = ProyectoDAO()
     
     # 1. Verificar si el empleado y proyecto existen (Validación Segura)
-    if dao_emp.get_empleado_by_id(empleado_id) is None:
-        print(f"Error de Validación: El Empleado ID '{empleado_id}' no existe.")
-        return
+    # if dao_emp.get_empleado_by_id(empleado_id) is None:
+    #     print(f"Error de Validación: El Empleado ID '{empleado_id}' no existe.")
+    #     return
         
-    # Verifica si el proyecto existe
-    if dao_proj.get_proyecto_by_id(proyecto_id) is None:
-        print(f"Error de Validación: El Proyecto ID '{proyecto_id}' no existe.")
-        return
+    # # Verifica si el proyecto existe
+    # if dao_proj.get_proyecto_by_id(proyecto_id) is None:
+    #     print(f"Error de Validación: El Proyecto ID '{proyecto_id}' no existe.")
+    #     return
     
     # 2. Llamar al DAO para realizar la asignación N:M
     if dao_emp.assign_empleado_to_proyecto(empleado_id, proyecto_id):
