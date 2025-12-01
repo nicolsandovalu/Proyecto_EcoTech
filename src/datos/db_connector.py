@@ -10,7 +10,7 @@ class DatabaseConnector:
     def __init__(self):
         self.user = os.getenv("DB_USER", "usuario_por_defecto")
         self.password = os.getenv("DB_PASS", "contasena_por_defecto")
-        self.host = os.getenv("DB_HOST", "localhost")
+        self.host = os.getenv("DB_HOST", "195.26.252.168")
         self.port = os.getenv("DB_PORT", "1521")
         self.service_name = os.getenv("DB_SERVICE", "XEPDB1")
         self._connection = None
