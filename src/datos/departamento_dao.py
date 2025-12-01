@@ -1,4 +1,4 @@
- import oracledb
+import oracledb
 from .db_connector import DatabaseConnector
 from ..dominio.departamento import Departamento
 from typing import List, Optional
@@ -7,7 +7,7 @@ class DepartamentoDAO:
     
     #Gestiona la persistencia de los objetos Departamento.
     
-    def _init_(self):
+    def __init__(self):
         self.db = DatabaseConnector()
 
     def create_departamento(self, departamento_obj: Departamento) -> int | None:
@@ -20,6 +20,9 @@ class DepartamentoDAO:
 
         cursor = conn.cursor()
         data = departamento_obj.to_dict()
+        
+        if 'id_departamento' in data:
+            del data['id_departamento']
         
         new_id_var = cursor.var(oracledb.NUMBER) 
         data['new_id'] = new_id_var
@@ -61,7 +64,7 @@ class DepartamentoDAO:
         cursor = conn.cursor()
         
         try:
-            sql = "SELECT ID_DEPARTAMENTO, NOMBRE, GERENTE_ID, FECHA_CREACION, ACTIVO FROM DEPARTAMENTO WHERE ID_DEPARTAMENTO = :id"
+            sql = "SELECT ID_DEPARTAMENTO, NOMBRE, EMPLEADO_ID, FECHA_CREACION, ACTIVO FROM DEPARTAMENTO WHERE ID_DEPARTAMENTO = :id"
             cursor.execute(sql, {'id': depto_id})
             row = cursor.fetchone()
             
@@ -171,7 +174,7 @@ class DepartamentoDAO:
         try:
             cursor = conn.cursor()
             sql = """
-                SELECT ID_DEPARTAMENTO, NOMBRE, GERENTE_ID, FECHA_CREACION, ACTIVO 
+                SELECT ID_DEPARTAMENTO, NOMBRE, EMPLEADO_ID, FECHA_CREACION, ACTIVO 
                 FROM DEPARTAMENTO 
                 ORDER BY NOMBRE"""
     

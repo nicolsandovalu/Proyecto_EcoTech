@@ -4,7 +4,7 @@ class Departamento:
     Corresponde al modelo de dominio (POO).
     """
 
-    def _init_(self, id_departamento: int = None, nombre: str = None,
+    def __init__(self, id_departamento: int = None, nombre: str = None,
                 gerente_id: str = None, activo: bool = True, fecha_creacion=None):
 
         # Atributos de persistencia
@@ -17,7 +17,7 @@ class Departamento:
 
         # Notas: Se puede agregar la fecha_creacion si es necesaria en el objeto.
 
-    def _str_(self):
+    def __str__(self):
         """Representación amigable del objeto."""
         estado = "Activo" if self.activo else "Inactivo"
         return f"Departamento ID: {self.id_departamento} | Nombre: {self.nombre} | Gerente ID: {self.gerente_id} | Estado: {estado}"

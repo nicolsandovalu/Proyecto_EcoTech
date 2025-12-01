@@ -115,7 +115,7 @@ class EmpleadoDAO:
 
         try:
             sql = """
-                    INSERT INTO EMPLEADO_PROYECTO (EMPLEADO_ID, PROYECTO_ID)
+                    INSERT INTO EMPLEADO_PROYECTO (ID_EMPLEADO, ID_PROYECTO)
                     VALUES (:emp_id, :proj_id)
                 """
             cursor.execute(

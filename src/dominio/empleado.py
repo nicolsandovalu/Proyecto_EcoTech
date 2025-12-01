@@ -27,6 +27,9 @@ class Empleado:
     def get_nombre(self) -> str:
         return self._nombre
     
+    def get_email(self) -> str:
+        return self._email
+    
     def get_salario(self) -> float:
         return self._salario
     
