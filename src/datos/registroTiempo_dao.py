@@ -1,4 +1,3 @@
-# Archivo: src/dao/registro_tiempo_dao.py
 
 from .db_connector import DatabaseConnector
 from ..dominio.registroTiempo import RegistroTiempo
