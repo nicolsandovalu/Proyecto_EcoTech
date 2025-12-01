@@ -7,15 +7,14 @@ class Departamento:
     """
 
     def __init__(self, id_departamento: int = None, nombre: str = None,
-                gerente_id: str = None, activo: bool = True, fecha_creacion=None):
+                 gerente_id: str = None, activo: bool = True):
 
         # Atributos de persistencia
         # PK, puede ser None al crear (usando secuencia)
         self.id_departamento = id_departamento
         self.nombre = nombre
         self.gerente_id = gerente_id            # FK a Empleado (Gerente)
-        self.activo = activo   # Para Soft Delete (True/False)
-        self.fecha_creacion = fecha_creacion
+        self.activo = activo                    # Para Soft Delete (True/False)
 
         # Notas: Se puede agregar la fecha_creacion si es necesaria en el objeto.
 
@@ -47,6 +46,4 @@ class Departamento:
 
     def validar_nombre(self) -> bool:
         """Verifica que el nombre tenga una longitud válida antes de la persistencia."""
-        if self.nombre is None: 
-            return False
         return 3 <= len(self.nombre) <= 50

@@ -1,7 +1,6 @@
-import oracledb
 from .db_connector import DatabaseConnector
 from ..dominio.departamento import Departamento
-from typing import List, Optional
+import oracledb
 
 class DepartamentoDAO:
     
@@ -10,47 +9,38 @@ class DepartamentoDAO:
     def __init__(self):
         self.db = DatabaseConnector()
 
-    def create_departamento(self, departamento_obj: Departamento) -> int | None:
+    def create_departamento(self, departamento_obj: Departamento) -> bool:
     
         #Registra un nuevo departamento en la base de datos (Operación CREATE).
         
         conn = self.db.connect()
         if not conn:
-            return None
+            return False
 
         cursor = conn.cursor()
         data = departamento_obj.to_dict()
-        
-        new_id_var = cursor.var(oracledb.NUMBER) 
-        data['new_id'] = new_id_var
         
         try:
             # Usamos la secuencia de Oracle para obtener el ID (Asumimos que está definida: seq_departamento)
             sql = """
                 INSERT INTO DEPARTAMENTO (ID_DEPARTAMENTO, NOMBRE, GERENTE_ID, ACTIVO)
                 VALUES (seq_departamento.NEXTVAL, :nombre, :gerente_id, :activo)
-                RETURNING ID_DEPARTAMENTO INTO :new_id
             """
             cursor.execute(sql, data)
             conn.commit()
-            
-            new_id = new_id_var.getvalue()[0]
-            departamento_obj.id_departamento = new_id
-            
-            print(f"Departamento '{departamento_obj.nombre}' creado con ID: {new_id}")
-            return new_id
+            print(f"Departamento '{data['nombre']}' creado exitosamente.")
+            return True
             
         except oracledb.Error as e:
             conn.rollback()
             error, = e.args
             print(f"Error ORA-{error.code} al crear departamento: {error.message}")
-            return None
+            return False
             
         finally:
-            if cursor:
-                cursor.close()
+            cursor.close()
 
-    def get_departamento_by_id(self, depto_id: int) -> Departamento | None:
+    def get_departamento_by_id(self, depto_id: int) -> Departamento or None:
         
         #Busca y retorna un departamento por su ID (Operación READ/Buscar).
         
@@ -61,7 +51,7 @@ class DepartamentoDAO:
         cursor = conn.cursor()
         
         try:
-            sql = "SELECT ID_DEPARTAMENTO, NOMBRE, GERENTE_ID, FECHA_CREACION, ACTIVO FROM DEPARTAMENTO WHERE ID_DEPARTAMENTO = :id"
+            sql = "SELECT ID_DEPARTAMENTO, NOMBRE, GERENTE_ID, ACTIVO FROM DEPARTAMENTO WHERE ID_DEPARTAMENTO = :id"
             cursor.execute(sql, {'id': depto_id})
             row = cursor.fetchone()
             
@@ -71,8 +61,7 @@ class DepartamentoDAO:
                     id_departamento=row[0],
                     nombre=row[1],
                     gerente_id=row[2],
-                    fecha_creacion=row[3],
-                    activo=int(row[4])
+                    activo=(row[3] == 1) # Mapeo de NUMBER(1) a booleano
                 )
             return None
             
@@ -82,8 +71,7 @@ class DepartamentoDAO:
             return None
             
         finally:
-            if cursor:
-                cursor.close()
+            cursor.close()
 
     def update_departamento(self, departamento_obj: Departamento) -> bool:
         
@@ -118,8 +106,7 @@ class DepartamentoDAO:
             return False
             
         finally:
-            if cursor:
-                cursor.close()
+            cursor.close()
 
     def delete_departamento(self, depto_id: int) -> bool:
         
@@ -154,49 +141,4 @@ class DepartamentoDAO:
             return False
             
         finally:
-            if cursor:
-                cursor.close()
-            
-# MÉTODO: READ (LISTAR)
-    def get_all_departamentos(self) -> List:
-    
-    #Recupera y retorna una lista de todos los departamentos registrados 
-        conn = self.db.connect()
-        if not conn:
-            return []
-
-        cursor = None
-        departamentos_list = []
-    
-        try:
-            cursor = conn.cursor()
-            sql = """
-                SELECT ID_DEPARTAMENTO, NOMBRE, GERENTE_ID, FECHA_CREACION, ACTIVO 
-                FROM DEPARTAMENTO 
-                ORDER BY NOMBRE"""
-    
-            cursor.execute(sql)
-            results = cursor.fetchall()
-        
-        # Mapea todas las filas a objetos del dominio
-            for row in results:
-                departamentos_list.append(Departamento(
-                    id_departamento=row[0],
-                    nombre=row[1],
-                    gerente_id=row[2],
-                    fecha_creacion=row[3],
-                    activo=int(row[4])
-                )
-            )
-        
-            return departamentos_list
-        
-        except oracledb.Error as e:
-            error, = e.args
-            print(f"Error ORA-{error.code} al listar departamentos: {error.message}")
-            return []
-        
-        finally:
-            if cursor:
-                cursor.close()
-            
+            cursor.close()
