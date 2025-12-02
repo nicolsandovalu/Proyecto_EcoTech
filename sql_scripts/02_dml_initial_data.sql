@@ -1,5 +1,4 @@
 -- DML - Datos Iniciales para Pruebas (EcoTech Solutions)
--- Asegúrese de que las tablas y secuencias (seq_rol, seq_departamento, etc.) hayan sido creadas.
 
 -- ========================================================
 -- 1. ROLES (Requisito de Autorización)
@@ -17,6 +16,9 @@ INSERT INTO Rol (id_rol, nombre, descripcion, nivel_permisos) VALUES (99, 'ADMIN
 INSERT INTO Cargo (id_cargo, nombre) VALUES ('DEV', 'Desarrollador de Software');
 INSERT INTO Cargo (id_cargo, nombre) VALUES ('HR_MGR', 'Gerente de Recursos Humanos');
 INSERT INTO Cargo (id_cargo, nombre) VALUES ('VENTAS', 'Ejecutivo de Ventas');
+INSERT INTO Cargo (id_cargo, nombre) VALUES ('GERENTE', 'Gerente de Proyectos');
+INSERT INTO Cargo (id_cargo, nombre) VALUES ('FIN_ANA', 'Analista Financiero');
+
 
 
 -- ========================================================
@@ -51,6 +53,15 @@ VALUES ('E200', 'DEV', 200, 'Joaquín Mendoza', 'joaquin.m@ecotech.com', 45000.0
 -- Contraseña almacenada: El hash que corresponde a la palabra 'admin123'
 INSERT INTO Usuario (id_usuario, id_empleado, nombre, contraseña, id_rol)
 VALUES ('E200', 'E200', 'joaquin', '$2b$12$Ea2267Gv33g4kH4vT9bAHe2/22t/P/2Jm7p/S.F7a8O.F7/2N/0P.', 10);
+
+--- EN CASO DE ERROR EN CONTRASEÑA JOAQUIN, INGRESAR:
+-- -- Reemplaza 'COPIA_AQUI_EL_HASH_GENERADO' por la cadena que te dio Python.
+-- Contraseña Plana: admin123
+-- UPDATE USUARIO
+-- SET CONTRaseña = '$2b$12$qM.gZPhh9Ff1Y72aAfh4f.hbXJgTlyj0lKVEgYxOuZmRUSjB0o2gu'
+-- WHERE NOMBRE = 'admin' OR NOMBRE = 'joaquin';
+
+-- COMMIT;
 
 
 -- ========================================================

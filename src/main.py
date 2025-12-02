@@ -44,9 +44,11 @@ def menu_empleado_admin():
     print("\n--- GESTIÓN DE EMPLEADOS ---")
     print("1. Registrar Nuevo Empleado (Create)")
     print("2. Listar Todos los Empleados (Read)")
-    print("3. Eliminar Empleado (Delete)")
-    print("4. Asignar/Desasignar Proyecto a Empleado (N:M)")
-    print("5. Volver al Menú Principal")
+    print("3. Modificar Empleado (Update)")
+    print("4. Eliminar Empleado (Delete)")
+    print("5. Asignar Proyecto a Empleado (N:M)")
+    print("6. Desasignar Proyecto a Empleado (N:M)")
+    print("7. Volver al Menú Principal")
     return input("Seleccione una opción: ")
 
 def register_new_employee():
@@ -61,7 +63,7 @@ def register_new_employee():
             'email': input("Email: "),
             'salario': float(input("Salario: ")),
             'id_departamento': int(input("ID Departamento (ej: 100): ")),
-            'id_cargo': input("ID Cargo (ej: DEV): "),
+            'id_cargo': input("ID Cargo (DEV, HR_MGR, VENTAS, GERENTE, FIN_ANA): "),
             'direccion': input("Dirección: "),
             'telefono': input("Teléfono: "),
             'fecha_inicio_contrato': input("Fecha Inicio (YYYY-MM-DD): ")
@@ -106,6 +108,59 @@ def list_all_employees():
             print(f"ID: {emp.get_id():<5}  | Nombre: {emp.get_nombre():<20} | Depto ID: {emp.get_id_departamento()}  | Salario: {emp.get_salario():.2f}")
     else:
         print("No hay empleados registrados o la conexión falló.")
+        
+def update_empleado_console():
+    print("\n--- MODIFICAR EMPLEADO ---")
+    dao = EmpleadoDAO()
+    
+    empleado_id = input("Ingrese el ID del Empleado a modificar: ")
+    empleado_obj = dao.get_empleado_by_id(empleado_id)
+    
+    if not empleado_obj:
+        print(f"Error: Empleado ID '{empleado_id}' no encontrado.")
+        return
+
+    print(f"\nModificando: {empleado_obj.get_nombre()}")
+    print("Presione Enter para mantener el valor actual.")
+
+    try:
+        # 1. Recopilar nuevos datos (actualizando el objeto existente)
+        
+        nuevo_nombre = input(f"Nombre (Actual: {empleado_obj.get_nombre()}): ")
+        if nuevo_nombre: empleado_obj._nombre = nuevo_nombre
+
+        nuevo_email = input(f"Email (Actual: {empleado_obj._email}): ")
+        if nuevo_email: empleado_obj._email = nuevo_email
+        
+        nuevo_salario_str = input(f"Salario (Actual: {empleado_obj.get_salario():.2f}): ")
+        if nuevo_salario_str: empleado_obj._salario = float(nuevo_salario_str)
+        
+        nueva_direccion = input(f"Dirección (Actual: {empleado_obj._direccion}): ")
+        if nueva_direccion: empleado_obj._direccion = nueva_direccion
+
+        nuevo_telefono = input(f"Teléfono (Actual: {empleado_obj._telefono}): ")
+        if nuevo_telefono: empleado_obj._telefono = nuevo_telefono
+        
+        nuevo_id_cargo = input(f"ID Cargo (Actual: {empleado_obj._id_cargo}): ")
+        if nuevo_id_cargo: empleado_obj._id_cargo = nuevo_id_cargo
+        
+        nuevo_id_depto_str = input(f"ID Departamento (Actual: {empleado_obj.get_id_departamento()}): ")
+        if nuevo_id_depto_str: empleado_obj._id_departamento = int(nuevo_id_depto_str)
+
+        nueva_fecha_str = input(f"Fecha Inicio (YYYY-MM-DD) (Actual: {empleado_obj._fecha_inicio_contrato}): ")
+        if nueva_fecha_str:
+             empleado_obj._fecha_inicio_contrato = nueva_fecha_str
+
+        # 2. Llamar al DAO para persistir los cambios
+        if dao.update_empleado(empleado_obj):
+            print(f"ÉXITO: Empleado {empleado_id} modificado correctamente.")
+        else:
+            print("FALLO: No se pudo modificar el empleado en la base de datos.")
+
+    except ValueError:
+        print("Error de tipo: El salario, el ID de departamento deben ser números o la fecha no tiene el formato correcto.")
+    except Exception as e:
+        print(f"Error inesperado durante la modificación: {e}")
 
 def assign_project_console():
     print("\n--- ASIGNACIÓN DE EMPLEADO A PROYECTO ---")
@@ -124,22 +179,44 @@ def assign_project_console():
         print(f"ÉXITO: Empleado {empleado_id} asignado al Proyecto {proyecto_id}.")
     else:
         print("ERROR: La asignación falló (Verifique IDs o conexión)")
-
-def delete_employee_console():
-    print("\n--- ELIMINACIÓN DE EMPLEADO ---")
-    empleado_id = input("Ingrese el ID del Empleado a ELIMINAR (Esta acción es permanente): ")
-    confirm = input(f"¿Confirma la eliminación del empleado {empleado_id}? (S/N): ").upper()
+        
+def deassign_empleado_from_proyecto():
+    print("\n--- DESASIGNACIÓN DE EMPLEADO A PROYECTO ---")
+    empleado_id = input("Ingrese el ID del Empleado a desasignar: ")
+    proyecto_id = input ("Ingrese el ID del proyecto (ej:1000): ")
     
-    if confirm != 'S':
-        print("Operación cancelada.")
-        return
-
-    dao = EmpleadoDAO()
-    if dao.delete_empleado(empleado_id):
-        print(f"ÉXITO: Empleado {empleado_id} eliminado exitosamente.")
+    try:
+        proyecto_id = int(proyecto_id)
+    except ValueError:
+        print(f"Érror: El ID del proyecto debe ser un número entero.")
+    
+    dao_emp = EmpleadoDAO()
+    
+    if dao_emp.deassign_empleado_from_proyecto(empleado_id, proyecto_id):
+        print(f"ÉXITO: Empleado {empleado_id} desasignado al Proyecto {proyecto_id}.")
     else:
-        print("ERROR: La eliminación falló (El empleado podría tener registros de tiempo dependientes).")
+        print("ERROR: La asignación falló (Verifique IDs o conexión)")
     
+    
+def deassign_empleado_from_proyecto_console():
+    print("\n--- DESASIGNACIÓN DE EMPLEADO A PROYECTO ---")
+    empleado_id = input("Ingrese el ID del Empleado a desasignar: ")
+    proyecto_id_str = input ("Ingrese el ID del proyecto (ej:1000): ")
+    
+    try:
+        proyecto_id = int(proyecto_id_str)
+    except ValueError:
+        print(f"Érror: El ID del proyecto debe ser un número entero.")
+        return
+    
+    dao_emp = EmpleadoDAO()
+    
+    # Llama al DAO de desasignación (Debe retornar True/False)
+    if dao_emp.deassign_empleado_from_proyecto(empleado_id, proyecto_id):
+        print(f"ÉXITO: Empleado {empleado_id} desasignado del Proyecto {proyecto_id}.")
+    else:
+        print("ERROR: La desasignación falló (Verifique IDs o conexión)")
+            
 #PROYECTOS, OPCIÓN 2 ADMIN
 
 def menu_proyectos_admin():
@@ -207,7 +284,6 @@ def update_proyecto_console():
 
         # Actualizar objeto de dominio
         proyecto_obj.editar(nombre=nuevo_nombre, descripcion=nueva_descripcion)
-        # La fecha no tiene un setter en dominio, se actualiza directamente para la persistencia
         proyecto_obj._fecha_inicio = fecha_inicio_nueva 
         
         if dao.update_proyecto(proyecto_obj):
@@ -578,9 +654,11 @@ def main():
                 sub_choice = menu_empleado_admin()
                 if sub_choice == '1': register_new_employee()
                 elif sub_choice == '2': list_all_employees()
-                elif sub_choice == '3': delete_employee_console()
-                elif sub_choice == '4': assign_project_console()
-                elif sub_choice == '5': continue
+                elif sub_choice == '3': update_empleado_console()
+                elif sub_choice == '4': delete_employee_console()
+                elif sub_choice == '5': assign_project_console()
+                elif sub_choice == '6': deassign_empleado_from_proyecto()
+                elif sub_choice == '7': continue
                 else: print("Opción no válida en el menú de Empleados.")
 
             elif choice == '2': # Gestión Proyectos
