@@ -30,7 +30,7 @@ class IndicadoresAPI:
                 year_str = str(fecha_obj.year)
 
                 if tipo in indicadores_sin_historial_diario:
-                    # Estrategia 1: Consulta por AÑO para obtener la serie completa
+
                     url = f"{self.base_url}/{tipo}/{year_str}"
                     print(
                         f"Consultando {tipo} por año: {year_str}")

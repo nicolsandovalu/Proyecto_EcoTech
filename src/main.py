@@ -14,10 +14,16 @@ from src.dominio.registroTiempo import RegistroTiempo
 from src.datos.rol_dao import RolDAO
 from src.dominio.rol import Rol
 from datetime import datetime, timedelta
-from datetime import date, datetime
 import getpass
 from typing import Optional
 from src.dominio.gestorIndicadores import GestorIndicadores
+
+
+INDICADORES_TODOS = {
+    '1': 'uf', '2': 'ivp', '3': 'ipc',
+    '4': 'utm', '5': 'dolar', '6': 'euro'
+}
+INDICADORES_RANGO = ['uf', 'dolar', 'euro']
 
 
 def display_menu(user_info):
@@ -223,9 +229,11 @@ def deassign_empleado_from_proyecto():
 
 def delete_employee_console():
     print("\n--- ELIMINACIÓN DE EMPLEADO ---")
-    empleado_id = input("Ingrese el ID del Empleado a ELIMINAR (Esta acción es permanente): ")
-    confirm = input(f"¿Confirma la eliminación del empleado {empleado_id}? (S/N): ").upper()
-    
+    empleado_id = input(
+        "Ingrese el ID del Empleado a ELIMINAR (Esta acción es permanente): ")
+    confirm = input(
+        f"¿Confirma la eliminación del empleado {empleado_id}? (S/N): ").upper()
+
     if confirm != 'S':
         print("Operación cancelada.")
         return
@@ -235,7 +243,7 @@ def delete_employee_console():
         print(f"ÉXITO: Empleado {empleado_id} eliminado exitosamente.")
     else:
         print("ERROR: La eliminación falló (El empleado podría tener registros de tiempo dependientes).")
-            
+
 # PROYECTOS, OPCIÓN 2 ADMIN
 
 
@@ -679,110 +687,124 @@ def register_time_console(user_info):
     except Exception as e:
         print(f"Error al registrar tiempo: {e}")
 
-# main.py (Nueva Función para manejar la entrada de rango)
 
+# --- FUNCIONES INDICADORES ---
 
-def menu_consulta_rangos(user_info):
-    """Interfaz para seleccionar consulta por día o por rango."""
-    print("\n--- SELECCIÓN DE CONSULTA DE INDICADORES ---")
-    print("1. Consultar un día específico.")
-    print("2. Consultar un rango de fechas. * Solo disponible para: UF, DOLAR, EURO.")
-    choice = input("Seleccione el modo de consulta: ")
+def menu_consulta_indicador(user_info):
+    """
+    Permite seleccionar un indicador y luego elegir entre consulta por día o por rango.
+    (Reemplaza la antigua menu_consulta_rangos)
+    """
+    print("\n--- SELECCIÓN DE INDICADOR Y MODO DE CONSULTA ---")
+    print("Seleccione el Indicador:")
 
-    # 1. Obtener ID del empleado
+    # Mostrar opciones de indicadores
+    for key, value in INDICADORES_TODOS.items():
+        print(f"{key}. {value.upper()}")
+
+    print("7. Volver al Menú Principal")
+
+    choice_indicador = input("Opción: ").strip()
+
+    if choice_indicador == '7':
+        return
+
+    if choice_indicador not in INDICADORES_TODOS:
+        print("Opción de indicador no válida.")
+        return
+
+    # Obtener el tipo de indicador seleccionado
+    tipo_indicador = INDICADORES_TODOS[choice_indicador]
     empleado_id_registro = user_info['id_empleado']
     gestor = GestorIndicadores()
 
-    if choice == '1':
-        # Consulta por día
+    # --- Menú de Modo de Consulta ---
+    print(f"\n--- MODO DE CONSULTA para {tipo_indicador.upper()} ---")
+
+    if tipo_indicador in INDICADORES_RANGO:
+        print("1. Consultar un día específico.")
+        print("2. Consultar un rango de fechas.")
+        choice_modo = input("Seleccione el modo: ").strip()
+    else:
+        # Los indicadores mensuales solo permiten la consulta por día
+        print("1. Consultar un día específico.")
+        print(
+            f"⚠️ Nota: El historial de {tipo_indicador.upper()} es solo mensual (un valor por mes), no soporta rango.")
+        choice_modo = '1'
+
+    if choice_modo == '1':
         fecha_consulta = input("Ingrese la fecha (YYYY-MM-DD): ").strip()
-        if not fecha_consulta:
+        if fecha_consulta:
+            consultar_y_registrar_dia_unico(
+                gestor, empleado_id_registro, tipo_indicador, fecha_consulta)
+        else:
             print("Fecha no puede ser vacía.")
-            return
 
-        # Llama a la función que procesa un solo día (lógica actual)
-        consultar_y_registrar_dia_unico(
-            gestor, empleado_id_registro, fecha_consulta)
-
-    elif choice == '2':
-        # Consulta por rango de fechas
+    elif choice_modo == '2' and tipo_indicador in INDICADORES_RANGO:
         fecha_inicio = input(
             "Ingrese la fecha de inicio (YYYY-MM-DD): ").strip()
         fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ").strip()
 
-        if not fecha_inicio or not fecha_fin:
+        if fecha_inicio and fecha_fin:
+            consultar_y_registrar_rango(
+                gestor, empleado_id_registro, tipo_indicador, fecha_inicio, fecha_fin)
+        else:
             print("Ambas fechas son requeridas para la consulta por rango.")
-            return
-
-        # Llama a la nueva función que procesa el rango
-        consultar_y_registrar_rango(
-            gestor, empleado_id_registro, fecha_inicio, fecha_fin)
 
     else:
         print("Opción no válida.")
 
 
-# Función Auxiliar para Día Único (Se mueve la lógica original aquí)
-def consultar_y_registrar_dia_unico(gestor, empleado_id, fecha_consulta):
-    indicadores = ["uf", "ivp", "ipc", "utm", "dolar", "euro"]
-    print("\n[ RESULTADOS DE LA CONSULTA DIARIA ]")
+def consultar_y_registrar_dia_unico(gestor, empleado_id, tipo_indicador, fecha_consulta):
+    """Auxiliar para consulta de día único. Se agregó 'tipo_indicador' al argumento."""
+    print(
+        f"\n[ RESULTADO DE LA CONSULTA DIARIA para {tipo_indicador.upper()} ]")
 
-    for tipo in indicadores:
-        # Lógica para obtener y registrar un solo día (ya corregida)
-        indicador_obj = gestor.obtener_y_registrar_indicador(
-            tipo=tipo, fecha=fecha_consulta, id_usuario_registro=empleado_id, registrar=False
-        )
-        if indicador_obj:
-            print(f"  > {indicador_obj}")
-            registrar = input(
-                "  ¿Desea registrar este valor en Oracle? (S/N): ").lower()
-            if registrar == 's':
+    indicador_obj = gestor.obtener_y_registrar_indicador(
+        tipo=tipo_indicador, fecha=fecha_consulta, id_usuario_registro=empleado_id, registrar=False
+    )
+
+    if indicador_obj:
+        print(f"  > {indicador_obj}")
+        registrar = input(
+            "  ¿Desea registrar este valor en Oracle? (S/N): ").lower()
+        if registrar == 's':
+            gestor.dao_oracle.registrar_indicador(
+                indicador=indicador_obj, id_usuario=empleado_id, sitio_proveedor=gestor.sitio_proveedor)
+            print(f"Registro de {tipo_indicador.upper()} completado.")
+    else:
+        print(
+            f"  > No se pudo obtener la información para {tipo_indicador.upper()} en {fecha_consulta}.")
+
+
+def consultar_y_registrar_rango(gestor, empleado_id, tipo_indicador, fecha_inicio_str, fecha_fin_str):
+    """Auxiliar para consulta de rango. Se agregó 'tipo_indicador' al argumento."""
+    print(
+        f"\n[ RESULTADOS DE LA CONSULTA POR RANGO para {tipo_indicador.upper()} ]")
+
+    valores_serie = gestor.obtener_serie_por_rango(
+        tipo=tipo_indicador, fecha_inicio=fecha_inicio_str, fecha_fin=fecha_fin_str
+    )
+
+    if valores_serie:
+        print(
+            f"  > {tipo_indicador.upper()} encontró {len(valores_serie)} valores en el rango.")
+
+        for indicador_obj in valores_serie:
+            print(f"    - {indicador_obj}")
+
+        registrar_serie = input(
+            "  ¿Desea registrar toda esta serie en Oracle? (S/N): ").lower()
+        if registrar_serie == 's':
+            for indicador_obj in valores_serie:
                 gestor.dao_oracle.registrar_indicador(
                     indicador=indicador_obj, id_usuario=empleado_id, sitio_proveedor=gestor.sitio_proveedor)
-        else:
             print(
-                f"  > No se pudo obtener la información para {tipo.upper()} en {fecha_consulta}.")
+                f"  ✅ Serie de {tipo_indicador.upper()} registrada con éxito.")
 
-
-# Función Auxiliar para Rango
-def consultar_y_registrar_rango(gestor, empleado_id, fecha_inicio_str, fecha_fin_str):
-    # Solo estos soportan rangos según API
-    indicadores = ["uf", "dolar", "euro"]
-
-    # Esta función asume que solo UF, DÓLAR y EURO soportan rangos
-    print("\n--- CONSULTA POR RANGO DE FECHAS ---")
-    print(
-        f"⚠️ Nota: El historial por rango solo está disponible para: {', '.join([i.upper() for i in indicadores])}.")
-    print("\n[ RESULTADOS DE LA CONSULTA POR RANGO ]")
-
-    for tipo in indicadores:
-        print(f"\nConsultando {tipo.upper()} en el rango...")
-
-        # El gestor debe tener un nuevo método para manejar rangos
-        valores_serie = gestor.obtener_serie_por_rango(
-            tipo=tipo, fecha_inicio=fecha_inicio_str, fecha_fin=fecha_fin_str
-        )
-
-        if valores_serie:
-            print(f"  > {tipo.upper()} encontró {len(valores_serie)} valores.")
-
-            for indicador_obj in valores_serie:
-                print(f"    - {indicador_obj}")
-
-                # Opcional: preguntar si quiere registrar toda la serie o solo algunos
-                # Por simplicidad, asumiremos que no se pregunta por cada uno.
-
-            # Si el usuario quiere registrar la serie completa
-            registrar_serie = input(
-                "  ¿Desea registrar toda esta serie en Oracle? (S/N): ").lower()
-            if registrar_serie == 's':
-                for indicador_obj in valores_serie:
-                    gestor.dao_oracle.registrar_indicador(
-                        indicador=indicador_obj, id_usuario=empleado_id, sitio_proveedor=gestor.sitio_proveedor)
-                print(f"Serie de {tipo.upper()} registrada con éxito.")
-
-        else:
-            print(f"  > No se encontró serie para {tipo.upper()}.")
+    else:
+        print(
+            f"  > No se encontró serie para {tipo_indicador.upper()} en ese rango.")
 
 
 def main():
@@ -901,7 +923,7 @@ def main():
         # Opción Común (Rol 10 o 99) - NUEVA OPCIÓN
         elif choice == '7':
             # Esta opción está disponible para TODOS los roles autenticados
-            menu_consulta_rangos(user_session)
+            menu_consulta_indicador(user_session)
 
         # Opciones de control de sesión
         elif choice == '9':
@@ -917,7 +939,6 @@ def main():
         elif choice not in ['1', '2', '3', '4', '5', '6', '9', '0']:
             print("Opción no válida.")
 
-    # Limpieza final
     db_manager.disconnect()
     print("Aplicación finalizada y conexión a DB cerrada.")
 
