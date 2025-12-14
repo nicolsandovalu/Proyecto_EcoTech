@@ -32,8 +32,9 @@ python -m venv .venv
 source .venv/bin/activate  # Para macOS/Linux
 # .venv\Scripts\activate   # Para Windows
 
-# 2. Instalar librerías esenciales (oracledb, dotenv, bcrypt)
+# 2. Instalar librerías esenciales (oracledb, dotenv, bcrypt, requests)
 pip install oracledb python-dotenv bcrypt
+pip install requests
 
 ```
 
