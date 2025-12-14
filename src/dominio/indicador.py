@@ -1,11 +1,10 @@
-# src/dominio/indicador.py
-
 from datetime import date
 from typing import Optional
 
 
+
 class Indicador:
-    """Modelo de datos para un indicador económico, usado por la Capa de Dominio."""
+    #Modelo de datos para un indicador económico, usado por la Capa de Dominio.
 
     def __init__(self, nombre: str, valor: float, fecha_valor: date, unidad: str,
                  codigo: str = None, sitio_proveedor: str = "mindicador.cl"):
@@ -37,7 +36,7 @@ class Indicador:
     # --- MÉTODO PARA EL DAO ---
 
     def to_dict(self) -> dict:
-        """Convierte el objeto a un diccionario para el uso en la Capa de Datos."""
+        #Convierte el objeto a un diccionario para el uso en la Capa de Datos.
         return {
             'nombre': self._nombre,
             'valor': self._valor,

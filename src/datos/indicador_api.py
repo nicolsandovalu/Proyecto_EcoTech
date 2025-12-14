@@ -1,13 +1,12 @@
-# src/datos/indicadores_api.py
-
 import requests
 import json
 from datetime import datetime
 from typing import Optional, Dict, Any, List
 
 
+
 class IndicadoresAPI:
-    """Clase para la conexión y consulta de la API externa de indicadores."""
+    #Clase para la conexión y consulta de la API externa de indicadores.
 
     def __init__(self):
         self.base_url = "https://mindicador.cl/api"
@@ -47,23 +46,19 @@ class IndicadoresAPI:
         else:
             print(
                 f"Consultando {tipo} actual (sin fecha).")
-            # URL ya está como /api/{tipo} para el valor actual
 
         try:
             # 1. Acceso a la fuente externa
-            # <<< CORRECCIÓN: AUMENTAR TIMEOUT >>>
             response = requests.get(url, timeout=30)
             response.raise_for_status()  # Lanza excepción para códigos 4xx/5xx
 
             # 2. Deserialización JSON
             data = response.json()
 
-            # <<< VERIFICACIÓN DE SERIE VACÍA >>>
             if 'serie' in data and not data['serie']:
                 print(
                     f"Advertencia: No se encontró valor para {tipo} en la fecha solicitada.")
                 return None
-            # <<< FIN VERIFICACIÓN >>>
 
             return data
 
@@ -78,3 +73,4 @@ class IndicadoresAPI:
             print(
                 f"Error inesperado durante la consulta: {e}")
             return None
+

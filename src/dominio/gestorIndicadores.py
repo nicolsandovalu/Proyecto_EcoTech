@@ -1,5 +1,3 @@
-# src/dominio/gestor_indicadores.py (Versión Completa y Corregida)
-
 from src.datos.indicador_api import IndicadoresAPI
 from src.datos.indicadores_dao import IndicadoresDAO
 from src.dominio.indicador import Indicador
@@ -8,9 +6,9 @@ from typing import Optional, Dict, Any, List
 
 
 class GestorIndicadores:
-    """
-    Gestiona la lógica de negocio para la consulta, validación y registro de indicadores.
-    """
+    
+    # Gestiona la lógica de negocio para la consulta, validación y registro de indicadores.
+    
 
     def __init__(self):
         self.api_data = IndicadoresAPI()
@@ -103,9 +101,6 @@ class GestorIndicadores:
             return None
 
     def obtener_y_registrar_indicador(self, tipo: str, fecha: Optional[str], id_usuario_registro: str, registrar: bool = False) -> Optional[Indicador]:
-        """
-        1. Consulta la API. 2. Deserializa/Valida. 3. (Opcional) Registra en Oracle.
-        """
 
         data_cruda = self.api_data.consultar_indicador(tipo, fecha)
 
@@ -117,7 +112,8 @@ class GestorIndicadores:
             success = self.dao_oracle.registrar_indicador(
                 indicador=indicador_obj,
                 id_usuario=id_usuario_registro,
-                sitio_proveedor=self.sitio_proveedor
+                sitio_proveedor=self.sitio_proveedor,
+                nombre_a_guardar=indicador_obj.get_nombre() 
             )
             if not success:
                 print(f"Advertencia: Falló el registro de {tipo} en la BD.")
@@ -125,9 +121,9 @@ class GestorIndicadores:
         return indicador_obj
 
     def obtener_serie_por_rango(self, tipo: str, fecha_inicio: str, fecha_fin: str) -> List[Indicador]:
-        """
-        Consulta la API, iterando día a día en el rango, y devuelve una lista de objetos Indicador.
-        """
+       
+        # Consulta la API, iterando día a día en el rango, y devuelve una lista de objetos Indicador.
+
         valores_serie = []
         try:
             start = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
