@@ -43,10 +43,10 @@ El archivo .env debe contener las credenciales exactas de su base de datos.
 
 ```bash
 # Ejemplo de configuración para Oracle (datos con fines académicos)
-DB_USER=NICOL_SANDOVAL
-DB_PASS=12345
-DB_HOST=195.26.252.168
-DB_PORT=1521
+DB_USER=TU_USUARIO
+DB_PASS=TU_CONTRASEÑA
+DB_HOST=IP PÚBLICA O localhost
+DB_PORT=1521 (Depende de tu configuración)
 DB_SERVICE=XEPDB1
 ```
 
@@ -82,6 +82,7 @@ python.exe -m src.main
 ```
 ## Credenciales de Login
 Utilice estos datos para probar la Autenticación y Autorización:
+
 
 ```bash
 | **Usuario (Login/Email)** | **Contraseña Plana** | **Rol ID** | **Permiso** |
