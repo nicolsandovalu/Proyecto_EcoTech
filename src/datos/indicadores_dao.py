@@ -2,7 +2,7 @@ import oracledb
 from src.datos.db_connector import DatabaseConnector
 from ..dominio.indicador import Indicador
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 
 class IndicadoresDAO:
@@ -58,7 +58,7 @@ class IndicadoresDAO:
             if cursor:
                 cursor.close()
 
-    def get_indicadores_by_range(self, tipo_indicador: str, fecha_inicio: date, fecha_fin: date) -> List[Indicador]:
+    def get_indicadores_by_range(self, tipo_indicador: str, fecha_inicio: datetime, fecha_fin: datetime) -> List[Indicador]:
         """
         Obtiene una lista de objetos Indicador registrados en la DB en un rango de fechas,
         para un tipo específico.
