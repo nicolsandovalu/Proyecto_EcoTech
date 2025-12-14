@@ -5,7 +5,7 @@ create table registro_indicador (
    valor            number(20,4) not null,
    fecha_valor      date not null,
    fecha_consulta   date not null,
-   id_empleado      varchar2(5) not null,
+   id_empleado      varchar2(20) not null,
    sitio_proveedor  varchar2(100) not null,
    constraint fk_reg_emp foreign key ( id_empleado )
       references empleado ( id_empleado )
