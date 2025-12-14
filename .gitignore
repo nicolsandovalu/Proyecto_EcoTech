@@ -4,7 +4,7 @@ __pycache__/
 *.pyc
 
 # Archivos de configuración sensible
-C:\Users\nicol\Proyecto_EcoTech\.env
+.env
 
 # Entornos virtuales
 venv/
